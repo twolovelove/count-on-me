@@ -67,4 +67,7 @@ export interface AppState {
   onboardingComplete: boolean;
   industry: Industry | null;
   simpleMode?: boolean;
+  businessType?: 'general' | 'simplified';
+  hasEmployees?: boolean;
+  checklistSetup?: boolean;
 }

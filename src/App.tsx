@@ -13,8 +13,9 @@ import { Onboarding } from './components/Onboarding';
 import { TransactionForm } from './components/TransactionForm';
 import { TransactionList } from './components/TransactionList';
 import { Summary } from './components/Summary';
+import { Checklist } from './components/Checklist';
 
-type Tab = 'home' | 'list' | 'summary';
+type Tab = 'home' | 'list' | 'summary' | 'checklist';
 
 function generateId() {
   return `tx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -204,6 +205,10 @@ export default function App() {
     .filter((t) => t.date.startsWith(thisMonth) && t.type === 'expense')
     .reduce((s, t) => s + t.amount, 0);
 
+  const balanceDiff = monthlyIncome - monthlyExpense;
+  const balanceClass = balanceDiff > 0 ? 'pos' : balanceDiff < 0 ? 'neg' : 'zero';
+  const balanceText = `${balanceDiff >= 0 ? '+' : ''}${formatHeaderAmount(balanceDiff)}원`;
+
   return (
     <div className="app">
       {/* Toast */}
@@ -211,14 +216,54 @@ export default function App() {
         <div className={`toast toast-${toast.type}`}>{toast.msg}</div>
       )}
 
+      {/* Desktop sidebar — hidden on mobile via CSS */}
+      <aside className="desktop-sidebar">
+        <div className="desktop-sidebar-top">
+          <span className="logo">내 장부</span>
+          <div className="desktop-balance">
+            <span className="header-balance-label">이번달 순이익</span>
+            <span className={`header-balance-value ${balanceClass}`}>{balanceText}</span>
+          </div>
+        </div>
+        <nav className="desktop-nav">
+          <button
+            className={`desktop-nav-btn ${tab === 'home' ? 'active' : ''}`}
+            onClick={() => { setEditingTx(undefined); setTab('home'); }}
+          >
+            <span className="nav-icon">✏️</span>
+            <span>입력</span>
+          </button>
+          <button
+            className={`desktop-nav-btn ${tab === 'list' ? 'active' : ''}`}
+            onClick={() => setTab('list')}
+          >
+            <span className="nav-icon">📋</span>
+            <span>내역</span>
+          </button>
+          <button
+            className={`desktop-nav-btn ${tab === 'summary' ? 'active' : ''}`}
+            onClick={() => setTab('summary')}
+          >
+            <span className="nav-icon">📊</span>
+            <span>요약</span>
+          </button>
+          <button
+            className={`desktop-nav-btn ${tab === 'checklist' ? 'active' : ''}`}
+            onClick={() => setTab('checklist')}
+          >
+            <span className="nav-icon">📅</span>
+            <span>일정</span>
+          </button>
+        </nav>
+      </aside>
+
+      {/* Mobile-only header */}
       <header className="app-header">
         <div className="header-inner">
           <span className="logo">내 장부</span>
           <div className="header-balance">
             <span className="header-balance-label">이번달 순이익</span>
-            <span className={`header-balance-value ${monthlyIncome - monthlyExpense > 0 ? 'pos' : monthlyIncome - monthlyExpense < 0 ? 'neg' : 'zero'}`}>
-              {monthlyIncome - monthlyExpense >= 0 ? '+' : ''}{formatHeaderAmount(monthlyIncome - monthlyExpense)}원
-            </span>
+            <span className={`header-balance-value ${balanceClass}`}>{balanceText}</span>
           </div>
         </div>
       </header>
@@ -251,8 +296,10 @@ export default function App() {
             onToggleSimpleMode={handleToggleSimpleMode}
           />
         )}
+        {tab === 'checklist' && <Checklist />}
       </main>
 
+      {/* Mobile-only bottom nav */}
       <nav className="bottom-nav">
         <button
           className={`nav-btn ${tab === 'home' ? 'active' : ''}`}
@@ -274,6 +321,13 @@ export default function App() {
         >
           <span className="nav-icon">📊</span>
           <span>요약</span>
+        </button>
+        <button
+          className={`nav-btn ${tab === 'checklist' ? 'active' : ''}`}
+          onClick={() => setTab('checklist')}
+        >
+          <span className="nav-icon">📅</span>
+          <span>일정</span>
         </button>
       </nav>
     </div>
