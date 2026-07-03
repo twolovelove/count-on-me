@@ -481,6 +481,22 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity
 .import-msg.success { background: var(--income-bg); color: var(--income); border: 1.5px solid var(--income-border); }
 .import-msg.error { background: var(--expense-bg); color: var(--expense); border: 1.5px solid var(--expense-border); }
 
+/* ===== Data-loss warning banner ===== */
+.data-loss-banner {
+  margin: 0 16px 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-xs);
+  background: #FFFBEB;
+  border: 1.5px solid #FCD34D;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.data-loss-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.data-loss-text { font-size: 0.8rem; color: #92400E; line-height: 1.5; flex: 1; }
+.data-loss-text strong { font-weight: 700; }
+.data-loss-close { color: #B45309; font-size: 0.85rem; padding: 2px 4px; flex-shrink: 0; }
+
 /* ===== Filters ===== */
 .filter-bar { padding: 0 16px 12px; display: flex; flex-direction: column; gap: 8px; }
 

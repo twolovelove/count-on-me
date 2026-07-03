@@ -16,12 +16,15 @@ const INDUSTRIES: { value: Industry; emoji: string; label: string; hint: string 
 ];
 
 type Step = 1 | 2 | 3;
+type BusinessType = 'general' | 'simplified';
 
 const today = new Date().toISOString().slice(0, 10);
 
 export function Onboarding({ onComplete }: Props) {
   const [step, setStep] = useState<Step>(1);
   const [industry, setIndustry] = useState<Industry | null>(null);
+  const [businessType, setBusinessType] = useState<BusinessType | null>(null);
+  const [hasEmployees, setHasEmployees] = useState<boolean | null>(null);
 
   // step 2 – first transaction
   const [hasTx, setHasTx] = useState<boolean | null>(null);
@@ -47,7 +50,11 @@ export function Onboarding({ onComplete }: Props) {
 
   function handleIndustrySelect(ind: Industry) {
     setIndustry(ind);
-    setTimeout(() => setStep(2), 150);
+  }
+
+  function handleStep1Next() {
+    if (!industry || !businessType || hasEmployees === null) return;
+    setStep(2);
   }
 
   function handleStep2Next() {
@@ -57,7 +64,13 @@ export function Onboarding({ onComplete }: Props) {
   function handleFinish() {
     if (!industry) return;
 
-    saveAppState({ onboardingComplete: true, industry });
+    saveAppState({
+      onboardingComplete: true,
+      industry,
+      businessType: businessType ?? undefined,
+      hasEmployees: hasEmployees ?? false,
+      checklistSetup: businessType !== null && hasEmployees !== null,
+    });
 
     const firstTx: Omit<Transaction, 'id' | 'createdAt'> | undefined =
       hasTx && txAmount
@@ -124,6 +137,55 @@ export function Onboarding({ onComplete }: Props) {
                 </button>
               ))}
             </div>
+
+            {industry && (
+              <>
+                <div className="setup-section" style={{ marginTop: 4 }}>
+                  <p className="setup-question">부가가치세 유형이 어떻게 되세요?</p>
+                  <div className="choice-row">
+                    <button
+                      className={`choice-btn ${businessType === 'general' ? 'selected' : ''}`}
+                      onClick={() => setBusinessType('general')}
+                    >
+                      일반과세자
+                    </button>
+                    <button
+                      className={`choice-btn ${businessType === 'simplified' ? 'selected' : ''}`}
+                      onClick={() => setBusinessType('simplified')}
+                    >
+                      간이과세자
+                    </button>
+                  </div>
+                  <p className="setup-hint">
+                    모르시면 사업자등록증 또는 홈택스에서 확인할 수 있어요
+                  </p>
+                </div>
+
+                <div className="setup-section">
+                  <p className="setup-question">직원(알바 포함)이 있으세요?</p>
+                  <div className="choice-row">
+                    <button
+                      className={`choice-btn ${hasEmployees === true ? 'selected' : ''}`}
+                      onClick={() => setHasEmployees(true)}
+                    >
+                      네, 있어요
+                    </button>
+                    <button
+                      className={`choice-btn ${hasEmployees === false ? 'selected' : ''}`}
+                      onClick={() => setHasEmployees(false)}
+                    >
+                      없어요
+                    </button>
+                  </div>
+                </div>
+
+                {businessType && hasEmployees !== null && (
+                  <button className="btn-primary" onClick={handleStep1Next}>
+                    다음 →
+                  </button>
+                )}
+              </>
+            )}
           </div>
         )}
 
