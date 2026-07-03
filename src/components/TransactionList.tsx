@@ -11,8 +11,6 @@ interface Props {
   onImport: (txs: Transaction[]) => void;
 }
 
-const BACKUP_DISMISSED_KEY = 'count_backup_banner_dismissed';
-
 type FilterPeriod = 'all' | 'this-month' | 'last-month' | 'custom';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
@@ -25,14 +23,6 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 
 export function TransactionList({ transactions, onDelete, onEdit, onClone, onImport }: Props) {
   const [period, setPeriod] = useState<FilterPeriod>('this-month');
-  const [backupBannerDismissed, setBackupBannerDismissed] = useState(
-    () => localStorage.getItem(BACKUP_DISMISSED_KEY) === 'true',
-  );
-
-  function dismissBackupBanner() {
-    localStorage.setItem(BACKUP_DISMISSED_KEY, 'true');
-    setBackupBannerDismissed(true);
-  }
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
   const [searchVendor, setSearchVendor] = useState('');
@@ -125,17 +115,6 @@ export function TransactionList({ transactions, onDelete, onEdit, onClone, onImp
           </button>
         </div>
       </div>
-
-      {!backupBannerDismissed && (
-        <div className="data-loss-banner">
-          <span className="data-loss-icon">💾</span>
-          <p className="data-loss-text">
-            기기가 바뀌거나 브라우저 캐시를 지우면 데이터가 사라질 수 있어요.
-            주기적으로 <strong>CSV 내보내기</strong>로 백업해 두세요.
-          </p>
-          <button className="btn-icon data-loss-close" onClick={dismissBackupBanner} title="닫기">✕</button>
-        </div>
-      )}
 
       {importMsg && (
         <div className={`import-msg ${importMsg.includes('오류') ? 'error' : 'success'}`}>
