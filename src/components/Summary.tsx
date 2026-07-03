@@ -5,15 +5,18 @@ import { loadRecurringRules, saveRecurringRules } from '../utils/storage';
 
 interface Props {
   transactions: Transaction[];
+  simpleMode: boolean;
+  onToggleSimpleMode: () => void;
 }
 
-export function Summary({ transactions }: Props) {
+export function Summary({ transactions, simpleMode, onToggleSimpleMode }: Props) {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [showTax, setShowTax] = useState(false);
   const [recurringRules, setRecurringRules] = useState<RecurringRule[]>(() => loadRecurringRules());
   const [showRecurring, setShowRecurring] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const monthStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
   const yearStr = String(selectedYear);
@@ -188,6 +191,35 @@ export function Summary({ transactions }: Props) {
 
         {showTax && yearlyStats.income === 0 && (
           <p className="tax-empty">연간 수입을 입력하면 세금 예측이 나타나요</p>
+        )}
+      </div>
+
+      {/* Settings */}
+      <div className="recurring-section">
+        <div className="yearly-header" onClick={() => setShowSettings((v) => !v)}>
+          <h3 className="breakdown-title">⚙️ 설정</h3>
+          <span className="toggle-arrow">{showSettings ? '▲' : '▼'}</span>
+        </div>
+        {showSettings && (
+          <div className="settings-list">
+            <div className="settings-row">
+              <div className="settings-info">
+                <span className="settings-label">초심플 카테고리 모드</span>
+                <span className="settings-desc">
+                  {simpleMode
+                    ? '원가 / 광고비 / 사무용품 (3분류)'
+                    : '기본 8개 카테고리 (재료비, 임대료 등)'}
+                </span>
+              </div>
+              <button
+                className={`toggle-switch ${simpleMode ? 'on' : ''}`}
+                onClick={onToggleSimpleMode}
+                aria-label="초심플 카테고리 모드 토글"
+              >
+                <span className="toggle-knob" />
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

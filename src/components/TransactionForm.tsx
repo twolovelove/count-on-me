@@ -96,24 +96,20 @@ export function TransactionForm({
     else setSuggestedCat(null);
   }, [vendor, memo, type, category]);
 
-  // Reset category default when type changes (but not during edit)
+  // Reset category default when type or simpleMode changes (but not during edit)
   useEffect(() => {
     if (isEditing) return;
-    setCategory(type === 'income' ? '매출' : '기타경비');
+    if (type === 'income') { setCategory('매출'); }
+    else { setCategory(simpleMode ? '원가' : '기타경비'); }
     setSuggestedCat(null);
-  }, [type, isEditing]);
+  }, [type, simpleMode, isEditing]);
 
   function formatAmount(val: string) {
     const n = val.replace(/[^0-9]/g, '');
     return n ? parseInt(n).toLocaleString() : '';
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const raw = parseFloat(amount.replace(/,/g, ''));
-    if (!raw || raw <= 0) { amountRef.current?.focus(); return; }
-    if (!memo.trim() && !showMemoHint) { setShowMemoHint(true); return; }
-
+  function commitSave(raw: number) {
     if (isEditing && editingTransaction) {
       const updated: Transaction = {
         ...editingTransaction,
@@ -142,6 +138,20 @@ export function TransactionForm({
       onAdd(partial);
     }
     resetForm();
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const raw = parseFloat(amount.replace(/,/g, ''));
+    if (!raw || raw <= 0) { amountRef.current?.focus(); return; }
+    if (!memo.trim() && !showMemoHint) { setShowMemoHint(true); return; }
+    commitSave(raw);
+  }
+
+  function handleSkipMemoAndSave() {
+    const raw = parseFloat(amount.replace(/,/g, ''));
+    if (!raw || raw <= 0) return;
+    commitSave(raw);
   }
 
   function resetForm() {
@@ -209,6 +219,24 @@ export function TransactionForm({
         </div>
       </div>
 
+      {/* Segment control — outside <form> */}
+      <div className="type-toggle">
+        <button
+          type="button"
+          className={`type-btn income ${type === 'income' ? 'active' : ''}`}
+          onClick={() => setType('income')}
+        >
+          💰 수입
+        </button>
+        <button
+          type="button"
+          className={`type-btn expense ${type === 'expense' ? 'active' : ''}`}
+          onClick={() => setType('expense')}
+        >
+          💸 지출
+        </button>
+      </div>
+
       {isEditing && (
         <div className="edit-banner">
           수정 중입니다. 변경사항을 저장하거나
@@ -241,41 +269,24 @@ export function TransactionForm({
       )}
 
       <form onSubmit={handleSubmit} className="tx-form">
-        <div className="type-toggle">
-          <button
-            type="button"
-            className={`type-btn income ${type === 'income' ? 'active' : ''}`}
-            onClick={() => setType('income')}
-          >
-            💰 돈 들어왔어요
-          </button>
-          <button
-            type="button"
-            className={`type-btn expense ${type === 'expense' ? 'active' : ''}`}
-            onClick={() => setType('expense')}
-          >
-            💸 돈 나갔어요
-          </button>
+        {/* Amount — hero element */}
+        <div className="amount-hero">
+          <input
+            ref={amountRef}
+            type="text"
+            inputMode="numeric"
+            className={`amount-hero-input ${type === 'income' ? 'income-color' : 'expense-color'}`}
+            placeholder="0"
+            value={amount}
+            onChange={(e) => setAmount(formatAmount(e.target.value))}
+          />
+          <span className="amount-hero-unit">원</span>
         </div>
 
         <label className="form-label">
           날짜
           <input type="date" className="form-input" value={date}
             onChange={(e) => setDate(e.target.value)} required />
-        </label>
-
-        <label className="form-label">
-          금액 <span className="required">*</span>
-          <div className="amount-wrapper">
-            <input
-              ref={amountRef}
-              type="text" inputMode="numeric" className="form-input amount-input"
-              placeholder="0" value={amount}
-              onChange={(e) => setAmount(formatAmount(e.target.value))}
-              required
-            />
-            <span className="amount-unit">원</span>
-          </div>
         </label>
 
         <label className="form-label">
@@ -289,8 +300,18 @@ export function TransactionForm({
           메모
           <input type="text" className="form-input"
             placeholder="예: 7월 임대료, 식자재 구입"
-            value={memo} onChange={(e) => setMemo(e.target.value)} />
+            value={memo}
+            onChange={(e) => { setMemo(e.target.value); if (e.target.value.trim()) setShowMemoHint(false); }}
+          />
         </label>
+        {showMemoHint && !memo.trim() && (
+          <div className="memo-hint">
+            💡 나중에 헷갈릴 수 있어요, 한 줄이라도 남겨주세요
+            <button type="button" className="memo-hint-skip" onClick={handleSkipMemoAndSave}>
+              그래도 저장할게요
+            </button>
+          </div>
+        )}
 
         <label className="form-label">
           항목
@@ -339,7 +360,10 @@ export function TransactionForm({
             </div>
           ) : (
             <>
-              <button type="submit" className="btn-primary btn-full">
+              <button
+                type="submit"
+                className={`btn-primary btn-full ${type === 'income' ? 'btn-income' : 'btn-expense'}`}
+              >
                 {type === 'income' ? '💰 수입 기록' : '💸 지출 기록'}
               </button>
               <button type="button" className="btn-ghost btn-sm"

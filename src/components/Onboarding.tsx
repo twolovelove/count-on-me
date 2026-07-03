@@ -107,6 +107,10 @@ export function Onboarding({ onComplete }: Props) {
           <div className="onboarding-step">
             <h1 className="onboarding-title">어떤 일을 하고 계세요?</h1>
             <p className="onboarding-desc">업종에 맞게 카테고리를 자동으로 설정해 드릴게요</p>
+            <div className="positioning-badge">
+              세무사를 대체하는 게 아니라,<br />
+              넘기기 전까지 방치 안 하게 도와주는 앱이에요
+            </div>
             <div className="industry-grid">
               {INDUSTRIES.map((ind) => (
                 <button

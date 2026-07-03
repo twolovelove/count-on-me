@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import type { Transaction } from '../types/transaction';
 import { parseCsv } from '../utils/csvImport';
+import { exportHometaxCsv } from '../utils/csvExport';
 
 interface Props {
   transactions: Transaction[];
@@ -17,6 +18,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   '재료비/매입비': '📦', '임대료': '🏠', '인건비': '👥',
   '통신비': '📱', '광고/마케팅비': '📣', '수수료(카드/플랫폼)': '💳',
   '소모품비': '🖊️', '기타경비': '🗂️',
+  '원가': '📦', '광고비': '📣', '사무용품': '🖊️',
 };
 
 export function TransactionList({ transactions, onDelete, onEdit, onClone, onImport }: Props) {
@@ -103,7 +105,13 @@ export function TransactionList({ transactions, onDelete, onEdit, onClone, onImp
             style={{ display: 'none' }} onChange={handleFileChange} />
           <button className="btn-ghost btn-sm"
             onClick={() => fileRef.current?.click()} disabled={importing}>
-            {importing ? '가져오는 중...' : '📥 CSV 가져오기'}
+            {importing ? '가져오는 중...' : '📥 가져오기'}
+          </button>
+          <button className="btn-ghost btn-sm"
+            onClick={() => exportHometaxCsv(filtered)}
+            disabled={filtered.length === 0}
+            title="홈택스 간편장부 형식으로 내보내기">
+            📤 내보내기
           </button>
         </div>
       </div>
@@ -190,7 +198,7 @@ export function TransactionList({ transactions, onDelete, onEdit, onClone, onImp
                 </div>
                 {txs.map((tx) => (
                   <div key={tx.id}
-                    className={`tx-item ${expandedId === tx.id ? 'expanded' : ''}`}
+                    className={`tx-item ${tx.type}-item ${expandedId === tx.id ? 'expanded' : ''}`}
                     onClick={() => setExpandedId(expandedId === tx.id ? null : tx.id)}>
                     <div className="tx-main">
                       <span className="tx-emoji">{CATEGORY_EMOJIS[tx.category] ?? '📝'}</span>

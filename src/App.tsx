@@ -213,12 +213,12 @@ export default function App() {
 
       <header className="app-header">
         <div className="header-inner">
-          <span className="logo">📒 내 장부</span>
-          <div className="header-mini-stats">
-            <span className="mini-income">+{formatHeaderAmount(monthlyIncome)}</span>
-            <span className="mini-sep">/</span>
-            <span className="mini-expense">-{formatHeaderAmount(monthlyExpense)}</span>
-            <span className="mini-label">이번달(원)</span>
+          <span className="logo">내 장부</span>
+          <div className="header-balance">
+            <span className="header-balance-label">이번달 순이익</span>
+            <span className={`header-balance-value ${monthlyIncome - monthlyExpense > 0 ? 'pos' : monthlyIncome - monthlyExpense < 0 ? 'neg' : 'zero'}`}>
+              {monthlyIncome - monthlyExpense >= 0 ? '+' : ''}{formatHeaderAmount(monthlyIncome - monthlyExpense)}원
+            </span>
           </div>
         </div>
       </header>
