@@ -1227,14 +1227,16 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity
 
 /* ===== Desktop layout (768px+) ===== */
 @media (min-width: 768px) {
-  body { overflow-x: hidden; }
+  body { overflow: hidden; }
 
   .app {
     flex-direction: row;
     align-items: stretch;
     max-width: 1280px;
-    min-height: 100dvh;
-    border-left: 1px solid var(--border);
+    height: 100dvh;
+    overflow: hidden;
+    border-left: none;
+    margin-left: 0;
   }
 
   /* Sidebar */
@@ -1245,9 +1247,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity
     flex-shrink: 0;
     background: var(--surface);
     border-right: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    height: 100dvh;
+    height: 100%;
     overflow-y: auto;
     padding: 28px 16px 24px;
     gap: 4px;
@@ -1322,6 +1322,8 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity
     padding: 28px 32px 40px;
     overflow-y: auto;
     max-width: 800px;
+    height: 100%;
+    padding-bottom: 40px;
   }
 
   /* Checklist card desktop width */
